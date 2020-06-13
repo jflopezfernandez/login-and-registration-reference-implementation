@@ -16,6 +16,13 @@
  */
 define( 'PEPPER', '4Xlf526DLSMI3Ys4nuIZoxac8qGrZqkpOGfxUGH1aKnIJrX576akF39ws3D2jh47' );
 
+/**
+ * The length of the salt is discretionary, and some people might consider 64
+ * bytes overkill. User passwords are notoriously low in entropy, though, and
+ * that is what we're after.
+ */
+define( 'SALT_LENGTH', 64 );
+
 $request_method = filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING);
 
 switch ($request_method) {
@@ -54,6 +61,39 @@ switch ($request_method) {
                      */
                     die("Password and confirmation string did not match.");
                 }
+
+                /**
+                 * Generate a user-specific salt using a cryptographically-
+                 * secure pseudo-random number generator.
+                 */
+                $salt = '';
+
+                for ($i = 0; $i < SALT_LENGTH; $i++) {
+                    $char = '';
+
+                    while (!ctype_print($char)) {
+                        try {
+                            $char = chr(random_int(0, 127));
+                        } catch (\Exception $exception) {
+                            die("Random number generator failed.");
+                        }
+                    }
+
+                    $salt .= $char;
+                }
+
+                /**
+                 * @todo Remove this in actual code.
+                 */
+                $length = strlen($salt);
+                echo "<p>Salt:&nbsp;<span>$salt</span>&nbsp;(Length:&nbsp;<span>$length</span>)</p>\n";
+
+                /**
+                 * HMAC the user's password using the salt. The salt will be
+                 * stored alongside the password in the database, but will be
+                 * user-specific, preventing a one-size-fits-all crack.
+                 */
+                $password = hash_hmac('sha512', $password, $salt);
 
                 /**
                  * HMAC the user's password using the pepper. This ensures that
