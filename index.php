@@ -6,6 +6,13 @@
  * stored in the database user table. The purpose of the pepper is to decouple
  * the risk of an adversary getting access to the key, of which now there are
  * two, plus the users' passwords themselves.
+ * 
+ * If this were a production server, this would not be defined here. One
+ * possible methodology is defining the PEPPER variable in the Apache
+ * configuration file (or in the configuration of whatever server you're using),
+ * and then accessing it via the $_ENV superglobal.
+ * 
+ * @todo Move this somewhere safe in real code.
  */
 define( 'PEPPER', '4Xlf526DLSMI3Ys4nuIZoxac8qGrZqkpOGfxUGH1aKnIJrX576akF39ws3D2jh47' );
 
